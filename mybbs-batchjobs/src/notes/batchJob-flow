@@ -1,0 +1,29 @@
+	
+Steps:
+	
+	1. get source page data from DB, sourcePage collection may be used in the whole flow.
+	
+	2. according to sourcePage.url, 
+		get the page content and store in file, 
+		the file's name is sourcePage.id. e.g. d:/mybbs/sourcePages/1111111
+		
+	3.according to sourcePage.sourcePageFilterList,
+		get all the fit urls, append as a long string ,and generate the string's md5
+		if the md5 is different from last time, store the fit urls in file, <a href='xxxx'>XXXXX</a>
+		the file's name is sourcePage.id. e.g. d:/mybbs/url/1111111
+		
+	4.
+	
+	
+Tips:
+
+	1. for Step 1, due to the source page settings may not be changed frequently,
+		so in the future, the data may load from cache, 
+		if the page source settings is changed in bbs-admin, 
+		then a notification will be sent to jms, before step 1 , 
+		try to get the notification from jms,
+		if data has been changed, load from db, else load form cache.
+		
+	2. File Synchronization.*
+		when bbs-batch generate the file with the fit urls, 
+		if concurrent, the app need to load the urls in the file, how to make it correct?

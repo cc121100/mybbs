@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:task="http://www.springframework.org/schema/task" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/integration 
+		http://www.springframework.org/schema/integration/spring-integration.xsd
+		http://www.springframework.org/schema/task 
+		http://www.springframework.org/schema/task/spring-task.xsd
+		http://www.springframework.org/schema/context     
+        http://www.springframework.org/schema/context/spring-context.xsd ">
+        
+    <import resource="classpath*:spring/applicationContext-base.xml" />
+
+	<context:component-scan base-package="org.cc.mybbs.batchjobs" />
+	<!-- <int:annotation-config /> -->
+	<!-- <context:property-placeholder location="classpath*:/*.properties"/> -->
+	
+	<!-- TODO get notice message from JMS -->
+
+	<int:inbound-channel-adapter id="loadSourcePageFromDB"
+		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadFromDB" auto-startup="true">
+		<int:poller fixed-rate="120000" />
+	</int:inbound-channel-adapter>
+
+	<int:splitter input-channel="sourcePagesInfoChl"
+		output-channel="singleSourcePageInfoChl" />
+
+	<int:service-activator id="downloadSourcePage" 
+		input-channel="singleSourcePageInfoChl" output-channel="downloadedSourcePageChl" 
+		ref="downloadSourcePageService" method="download" />
+		
+	
+	<int:service-activator id="filterSourcePage" 
+		input-channel="downloadedSourcePageChl" output-channel="filteredSourcePageChl" 
+		ref="filterSourcePageService" method="filterSourcePage" />
+		
+	<!-- TODO check md5 -->
+	
+	<int:service-activator id="md5CheckSourcePage" 
+		input-channel="filteredSourcePageChl" output-channel="md5CheckedSourcePageChl" 
+		ref="md5CheckService" method="check" />
+		
+	<int:service-activator id="storeFitUrl" 
+		input-channel="md5CheckedSourcePageChl" 
+		ref="storeFitUrlService" method="store" />
+	
+	<!-- <int:service-activator id="generatePageFile" 
+		input-channel="filteredSourcePageChl"
+		ref="" method="" /> -->
+	
+
+	<!-- channels -->
+	<int:channel id="sourcePagesInfoChl" />
+	<int:channel id="singleSourcePageInfoChl">
+		<int:dispatcher task-executor="processSourcePageExecutor" />
+	</int:channel>
+	<int:channel id="downloadedSourcePageChl"/>
+	<int:channel id="filteredSourcePageChl"/>
+	<int:channel id="md5CheckedSourcePageChl"/>
+
+
+	<task:executor id="processSourcePageExecutor" pool-size="5-10"
+		queue-capacity="20" keep-alive="120" />
+
+</beans>
