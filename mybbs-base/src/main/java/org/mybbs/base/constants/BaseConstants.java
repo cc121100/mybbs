@@ -19,9 +19,12 @@ public class BaseConstants {
 	public final static String FILTER_REFLECT_METHOD_SET = "Set";
 	
 	//
-	public final static String SP_Category_T = "T";//Target url
-	public final static String SP_Category_S = "S";//Sample
-	public final static String SP_Category_N = "N";//Navigate url
+	public final static String SP_CATEGORY_T = "T";//Target url
+	public final static String SP_CATEGORY_S = "S";//Sample
+	public final static String SP_CATEGORY_N = "N";//Navigate url
+	
+	public final static String US_CATEGORY_D = "D"; //default setting
+	public final static String US_CATEGORY_U = "u"; //user setting
 	
 
 }

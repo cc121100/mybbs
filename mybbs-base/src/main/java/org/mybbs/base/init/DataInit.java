@@ -11,10 +11,12 @@ import org.junit.runner.RunWith;
 import org.mybbs.base.constants.BaseConstants;
 import org.mybbs.base.dao.FilterDAO;
 import org.mybbs.base.dao.SourcePageDAO;
+import org.mybbs.base.dao.UserSettingDAO;
 import org.mybbs.base.model.Filter;
 import org.mybbs.base.model.SourcePage;
 import org.mybbs.base.model.SourcePageFilter;
 import org.mybbs.base.model.SourcePageFilterDetail;
+import org.mybbs.base.model.UserSetting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -36,6 +38,9 @@ public class DataInit {
 	
 	@Autowired
 	private SourcePageDAO sourcePageDAO;
+	
+	@Autowired
+	private UserSettingDAO userSettingDAO;
 	
 
 	@Test
@@ -175,7 +180,7 @@ public class DataInit {
 			System.out.println(filter.getFilterName());
 		}*/
 		
-		List<SourcePage> sourcePageList =  sourcePageDAO.getSourcePagesByStatusAndCategory("A", BaseConstants.SP_Category_T);
+		List<SourcePage> sourcePageList =  sourcePageDAO.getSourcePagesByStatusAndCategory("A", BaseConstants.SP_CATEGORY_T);
 		for(SourcePage sp :sourcePageList){
 			
 			System.out.println(sp.getTargetPageName() + ":" + sp.getSourcePageFilters().size());
@@ -197,21 +202,13 @@ public class DataInit {
 		}
 		
 		//sourcePage
-		SourcePage sourcePage2 = new SourcePage();
-		sourcePage2.setTargetPageName("天涯论坛首页热帖Sample");
-		sourcePage2.setTargetPageUrl("http://bbs.tianya.cn");
-		sourcePage2.setStatus("A");
-		sourcePage2.setDomainName("http://bbs.tianya.cn");
-		sourcePage2.setCategory(BaseConstants.SP_Category_S);
-		sourcePageDAO.saveAndFlush(sourcePage2);
 		
 		SourcePage sourcePage = new SourcePage();
-		sourcePage.setTargetPageName("天涯论坛首页热帖");
+		sourcePage.setTargetPageName("天涯论坛首页热帖Sample");
 		sourcePage.setTargetPageUrl("http://bbs.tianya.cn");
 		sourcePage.setStatus("A");
 		sourcePage.setDomainName("http://bbs.tianya.cn");
-		sourcePage.setCategory(BaseConstants.SP_Category_T);
-		sourcePage.setSampleSourcePage(sourcePage2);
+		sourcePage.setCategory(BaseConstants.SP_CATEGORY_S);
 		
 		
 		List<SourcePageFilter> sourcePageFilters = new ArrayList<SourcePageFilter>();
@@ -331,23 +328,23 @@ public class DataInit {
 		sourcePage.setSourcePageFilters(sourcePageFilters);
 		sourcePageDAO.saveAndFlush(sourcePage);
 		
+		SourcePage sourcePage2 = new SourcePage();
+		sourcePage2.setTargetPageName("天涯论坛首页热帖");
+		sourcePage2.setTargetPageUrl("http://bbs.tianya.cn");
+		sourcePage2.setStatus("A");
+		sourcePage2.setDomainName("http://bbs.tianya.cn");
+		sourcePage2.setCategory(BaseConstants.SP_CATEGORY_T);
+		sourcePage2.setSampleSPId(sourcePage.getId());
+		sourcePageDAO.saveAndFlush(sourcePage2);
+		
 		
 		//jianshu.io
-		SourcePage jianshu2 = new SourcePage();
-		jianshu2.setTargetPageName("简书首页Sample");
-		jianshu2.setTargetPageUrl("http://jianshu.io");
-		jianshu2.setStatus("A");
-		jianshu2.setDomainName("http://jianshu.io");
-		jianshu2.setCategory(BaseConstants.SP_Category_S);
-		sourcePageDAO.saveAndFlush(jianshu2);
-		
 		SourcePage jianshu = new SourcePage();
-		jianshu.setTargetPageName("简书首页");
+		jianshu.setTargetPageName("简书首页Sample");
 		jianshu.setTargetPageUrl("http://jianshu.io");
 		jianshu.setStatus("A");
 		jianshu.setDomainName("http://jianshu.io");
-		jianshu.setCategory(BaseConstants.SP_Category_T);
-		jianshu.setSampleSourcePage(jianshu2);
+		jianshu.setCategory(BaseConstants.SP_CATEGORY_S);
 		
 		List<SourcePageFilter> jiaoshuFilters = new ArrayList<SourcePageFilter>();
 		
@@ -416,15 +413,35 @@ public class DataInit {
 		
 		sourcePageDAO.saveAndFlush(jianshu);
 		
+		SourcePage jianshu2 = new SourcePage();
+		jianshu2.setTargetPageName("简书首页");
+		jianshu2.setTargetPageUrl("http://jianshu.io");
+		jianshu2.setStatus("A");
+		jianshu2.setDomainName("http://jianshu.io");
+		jianshu2.setCategory(BaseConstants.SP_CATEGORY_T);
+		jianshu2.setSampleSPId(jianshu.getId());
+		sourcePageDAO.saveAndFlush(jianshu2);
+		
 		
 	}
 	
 	@Test
 	public void test1() throws ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException{
-		List<SourcePage> list = sourcePageDAO.getSubscribedSP();
-		for(SourcePage sp : list){
-			if(sp.getUserSettings()!=null && sp.getUserSettings().size() > 0)
-			System.out.println(sp.getTargetPageName());
+		/*List<UserSetting> usList = userSettingDAO.findAll();
+		for(UserSetting us : usList){
+			System.out.println(us.getSourcePages().size());
+		}*/
+		
+		SourcePage sp = sourcePageDAO.findOne("4028e5e4473da73501473da740cb000c");
+		List<SourcePage> spList = new ArrayList<SourcePage>();
+		spList.add(sp);
+		lazyLoadSPFilters(spList);
+		
+	}
+	
+	private void lazyLoadSPFilters(List<SourcePage> spList){
+		for(SourcePage sp : spList){
+			sp.getSourcePageFilters().size();
 		}
 	}
 }

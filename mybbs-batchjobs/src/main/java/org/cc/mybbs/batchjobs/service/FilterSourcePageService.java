@@ -46,7 +46,7 @@ public class FilterSourcePageService {
 		String htmlStr = loadPageFileAsString(pageFilePath);
 
 		// 2. get fit urls
-		Map<String,String> map = parseHtml(htmlStr, sourcePage);
+		Map<String,String> map = parseHtml(htmlStr, sourcePage.getSampleSourcePage());
 		
 		sourcePage.setUrlAndContentMap(map);
 		
@@ -79,7 +79,7 @@ public class FilterSourcePageService {
 	 * 
 	 * @param htmlStr
 	 * @param sourcePage
-	 * @return
+	 * @return key: href value: xxx, <a href=''>xxx</a>
 	 */
 	public Map<String,String> parseHtml(String htmlStr, SourcePage sourcePage) {
 		

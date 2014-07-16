@@ -19,9 +19,19 @@
 	
 	<!-- TODO get notice message from JMS -->
 
-	<int:inbound-channel-adapter id="loadSourcePageFromDB"
+	<!-- <int:inbound-channel-adapter id="loadSourcePageFromDB"
 		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadFromDB" auto-startup="true">
 		<int:poller fixed-rate="120000" />
+	</int:inbound-channel-adapter> -->
+	
+	<int:inbound-channel-adapter id="loadActiveSPFromDB"
+		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadActiveSPFromDB" auto-startup="true">
+		<int:poller fixed-rate="120000" />
+	</int:inbound-channel-adapter>
+	
+	<int:inbound-channel-adapter id="loadSubscribedSPFromDB"
+		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadSubscribedSPFromDB" auto-startup="true">
+		<int:poller fixed-rate="60000" />
 	</int:inbound-channel-adapter>
 
 	<int:splitter input-channel="sourcePagesInfoChl"
@@ -42,13 +52,18 @@
 		input-channel="filteredSourcePageChl" output-channel="md5CheckedSourcePageChl" 
 		ref="md5CheckService" method="check" />
 		
+	<int:router input-channel="md5CheckedSourcePageChl" expression="payload.category">
+		<int:mapping value="T" channel="pengdingStoreSPInFileChl"/>		
+		<int:mapping value="N" channel="pendingStoreSPInDBChl"/>		
+	</int:router>
+		
 	<int:service-activator id="storeFitUrl" 
-		input-channel="md5CheckedSourcePageChl" 
+		input-channel="pengdingStoreSPInFileChl" 
 		ref="storeFitUrlService" method="store" />
 	
-	<!-- <int:service-activator id="generatePageFile" 
-		input-channel="filteredSourcePageChl"
-		ref="" method="" /> -->
+	<int:service-activator id="updateSubSPForNaviSP" 
+		input-channel="pendingStoreSPInDBChl"
+		ref="updateSubSPForNaviSPService" method="update" />
 	
 
 	<!-- channels -->
@@ -59,9 +74,11 @@
 	<int:channel id="downloadedSourcePageChl"/>
 	<int:channel id="filteredSourcePageChl"/>
 	<int:channel id="md5CheckedSourcePageChl"/>
+	<int:channel id="pengdingStoreSPInFileChl"/>
+	<int:channel id="pendingStoreSPInDBChl"/>
 
 
-	<task:executor id="processSourcePageExecutor" pool-size="5-10"
+	<task:executor id="processSourcePageExecutor" pool-size="5-20"
 		queue-capacity="20" keep-alive="120" />
 
 </beans>

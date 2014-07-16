@@ -41,7 +41,7 @@ public class SourcePage extends BaseModel {
 	@Column(name="category" ,nullable=false)
 	private String category;
 	
-	@Column(name="sp_status", nullable = false)
+	@Column(name="status", nullable = false)
 	@NotEmpty
 	private String status;
 	
@@ -59,16 +59,19 @@ public class SourcePage extends BaseModel {
 			inverseJoinColumns = @JoinColumn(name="source_pagefilter_id",referencedColumnName = "id"),
 			uniqueConstraints = @UniqueConstraint(columnNames={"source_page_id" ,"source_pagefilter_id"})
 	)*/
-	@OneToMany(cascade = CascadeType.PERSIST, mappedBy="sourcePage")
-	@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(cascade = CascadeType.PERSIST, mappedBy="sourcePage",fetch = FetchType.LAZY)
+	//@LazyCollection(LazyCollectionOption.TRUE)
 	private List<SourcePageFilter> sourcePageFilters;
 	
 	@ManyToMany(mappedBy = "sourcePages")
 	//@JoinColumn(name = "page_id")
 	private List<UserSetting> userSettings;
 	
-	@OneToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "sample_sp_id")
+	//@OneToOne(fetch = FetchType.LAZY)
+	@Column(name = "sample_sp_id")
+	private String sampleSPId;
+	
+	@Transient
 	private SourcePage sampleSourcePage;
 	
 	@Transient
@@ -162,6 +165,40 @@ public class SourcePage extends BaseModel {
 	public void setSampleSourcePage(SourcePage sampleSourcePage) {
 		this.sampleSourcePage = sampleSourcePage;
 	}
+
+	public String getSampleSPId() {
+		return sampleSPId;
+	}
+
+	public void setSampleSPId(String sampleSPId) {
+		this.sampleSPId = sampleSPId;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SourcePage other = (SourcePage) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
+	
 	
 	
 }

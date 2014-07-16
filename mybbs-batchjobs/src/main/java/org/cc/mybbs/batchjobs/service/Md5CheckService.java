@@ -10,6 +10,7 @@ import org.mybbs.base.dao.SourcePageDAO;
 import org.mybbs.base.model.SourcePage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class Md5CheckService {
@@ -19,7 +20,7 @@ public class Md5CheckService {
 	@Autowired
 	private SourcePageDAO sourcePageDAO;
 	
-	
+	@Transactional
 	public SourcePage check(SourcePage sourcePage){
 		logger.info("Check md5 code of sourcePage: " + sourcePage.getTargetPageName() + ", old md5 code is " + sourcePage.getMd5Code());
 		
