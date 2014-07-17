@@ -1,6 +1,7 @@
 package org.cc.mybbs.batchjobs.service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -24,48 +25,115 @@ public class UpdateSubSPForNaviSPService {
 	@Transactional
 	public void update(SourcePage sourcePage){
 		try{
-			// 1 delete all sub sp for the sample sp
 			logger.info("Start update sub source pages for sample source page:" + sourcePage.getId());
+			
+			/** 1. if first time update sub source pages for for sample source page, 
+			 * 		it means sourcePageDAO.getAllSubSPForSampleSP(sourcePage.getId()) is null or size < 1
+			 *		add all the sub source pages 
+			*/
+			
 			List<SourcePage> oldSubSPList = sourcePageDAO.getAllSubSPForSampleSP(sourcePage.getId());
+			List<SourcePage> newSubSPList =  generateNewSubSPList(sourcePage);
 			
-			String domainName = null;
 			if(oldSubSPList != null && oldSubSPList.size() > 0){
-				domainName = oldSubSPList.get(0).getDomainName();
+				
+				logger.info("First time update sub source pages for source page :" + sourcePage.getId());
+				sourcePageDAO.save((Iterable<SourcePage>)newSubSPList.iterator());
+				sourcePageDAO.flush();
+				logger.info("Successfully add new sub source pages, with count " + oldSubSPList.size());
+				
+			}else{
+				
+				/**
+				 * 	2. if not first time
+				 * 		subSP.uniqueLabel = sourcePage.uniqueLabel + "-" + subSP.targetPageName, uniqueLabel is unupdated
+				 * 		loop subSPList , update the subSp's targetUrl, if not match, by uniqueLabel
+				 * 				delete not exsited subSP
+				 * 				add new subSP
+				 */
+				
+				logger.info("Update sub source pages for source page :" + sourcePage.getId());
+				SourcePage oldSP = null;
+				SourcePage newSP = null;
+				boolean isExsitedSP = false;
+				
+				Iterator<SourcePage> it = oldSubSPList.iterator();
+				while(it.hasNext()){
+					isExsitedSP = false;
+					oldSP = it.next();
+					for(int j = 0; j < newSubSPList.size(); j++){
+						newSP = newSubSPList.get(j);
+						if(oldSP.getUniqueLabel().equals(newSP.getUniqueLabel())){
+							if(!oldSP.getTargetPageName().equals(newSP.getTargetPageName())){
+								oldSP.setTargetPageName(newSP.getTargetPageName());
+							}
+							if(!oldSP.getTargetPageUrl().equals(newSP.getTargetPageUrl())){
+								oldSP.setTargetPageUrl(newSP.getTargetPageUrl());
+							}
+							if(!oldSP.getDomainName().equals(newSP.getDomainName())){
+								oldSP.setDomainName(newSP.getDomainName());
+							}
+							
+							isExsitedSP = true;
+							break;
+						}
+						
+					}
+					
+					if(!isExsitedSP){
+						it.remove();
+					}
+				}
+				
+				for(int i = 0; i < newSubSPList.size(); i++){
+					isExsitedSP = false;
+					newSP = newSubSPList.get(i);
+					for(int j = 0;j < oldSubSPList.size(); j++){
+						oldSP = oldSubSPList.get(j);
+						if(newSP.getUniqueLabel().equals(oldSP.getUniqueLabel())){
+							isExsitedSP = true;
+							break;
+						}
+					}
+					
+					if(!isExsitedSP){
+						oldSubSPList.add(newSP);
+					}
+				}
+				
+				sourcePageDAO.save((Iterable<SourcePage>)oldSubSPList.iterator());
+				sourcePageDAO.flush();
+				logger.info("Successfully update sub source pages, with count " + oldSubSPList.size());
+				
 			}
-			
-			logger.info("	Delete old sub source pages for sample source page:" + sourcePage.getId());
-			sourcePageDAO.deleteInBatch((Iterable<SourcePage>) oldSubSPList.iterator());
-			
-			// 2 add new sub sp for the smple sp
-			logger.info("	Add new sub source pages for sample source page:" + sourcePage.getId());
 			
 		}catch(Exception e){
 			logger.error("Error occurs when update sub source pages for sample source page, " +e);
 		}
 		
-		
-		
-		
 	}
 	
-	private List<SourcePage> generateNewSubSPList(SourcePage sampleSP, String domainName){
-		
-		if(StringUtils.isEmpty(domainName)){
-			return null;
-		}
+	private List<SourcePage> generateNewSubSPList(SourcePage sampleSP){
 		
 		List<SourcePage> newSubSPList = new ArrayList<SourcePage>();
 		SourcePage newSubSP = null;
 		for(Entry<String, String> entry : sampleSP.getUrlAndContentMap().entrySet()){
 			newSubSP = new SourcePage();
-			newSubSP.setTargetPageName(sampleSP.getTargetPageName() + " - " + entry.getValue());
+			newSubSP.setTargetPageName(sampleSP.getUniqueLabel() + " - " + entry.getValue());
 			newSubSP.setTargetPageUrl(sampleSP.getDomainName() + "/" + entry.getKey());
+			newSubSP.setUniqueLabel(sampleSP.getUniqueLabel() + " - " + entry.getValue());
 			newSubSP.setStatus(BaseConstants.STATUA_A);
 			newSubSP.setCategory(BaseConstants.SP_CATEGORY_T);
-			newSubSP.setDomainName(domainName);
+			if(StringUtils.isEmpty(sampleSP.getSubSPDomainName())){
+				newSubSP.setDomainName(sampleSP.getDomainName());
+			}else{
+				newSubSP.setDomainName(sampleSP.getSubSPDomainName());
+			}
 			newSubSP.setSampleSPId(sampleSP.getId());
+			
+			newSubSPList.add(newSubSP);
 		}
 		
-		return null;
+		return newSubSPList;
 	}
 }

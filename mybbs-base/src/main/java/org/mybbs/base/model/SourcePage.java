@@ -71,6 +71,12 @@ public class SourcePage extends BaseModel {
 	@Column(name = "sample_sp_id")
 	private String sampleSPId;
 	
+	@Column(name = "sub_sp_domain_name")
+	private String subSPDomainName;
+	
+	@Column(name = "unique_label", updatable = false)
+	private String uniqueLabel;
+	
 	@Transient
 	private SourcePage sampleSourcePage;
 	
@@ -174,6 +180,22 @@ public class SourcePage extends BaseModel {
 		this.sampleSPId = sampleSPId;
 	}
 
+	public String getSubSPDomainName() {
+		return subSPDomainName;
+	}
+	
+	public void setSubSPDomainName(String subSPDomainName) {
+		this.subSPDomainName = subSPDomainName;
+	}
+	
+	public String getUniqueLabel() {
+		return uniqueLabel;
+	}
+	
+	public void setUniqueLabel(String uniqueLabel) {
+		this.uniqueLabel = uniqueLabel;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -198,7 +220,5 @@ public class SourcePage extends BaseModel {
 			return false;
 		return true;
 	}
-	
-	
-	
+
 }

@@ -2,6 +2,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:int="http://www.springframework.org/schema/integration"
 	xmlns:task="http://www.springframework.org/schema/task" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jms="http://www.springframework.org/schema/integration/jms"
+	xmlns:stream="http://www.springframework.org/schema/integration/stream"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans 
 		http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/integration 
@@ -9,73 +11,79 @@
 		http://www.springframework.org/schema/task 
 		http://www.springframework.org/schema/task/spring-task.xsd
 		http://www.springframework.org/schema/context     
-        http://www.springframework.org/schema/context/spring-context.xsd ">
-        
-    <import resource="classpath*:spring/applicationContext-base.xml" />
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/integration/jms
+		http://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd
+		http://www.springframework.org/schema/integration/stream
+		http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd">
+
+	<import resource="classpath*:spring/applicationContext-base.xml" />
 
 	<context:component-scan base-package="org.cc.mybbs.batchjobs" />
 	<!-- <int:annotation-config /> -->
 	<!-- <context:property-placeholder location="classpath*:/*.properties"/> -->
-	
+
 	<!-- TODO get notice message from JMS -->
 
-	<!-- <int:inbound-channel-adapter id="loadSourcePageFromDB"
-		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadFromDB" auto-startup="true">
-		<int:poller fixed-rate="120000" />
-	</int:inbound-channel-adapter> -->
-	
+	<!-- <int:inbound-channel-adapter id="loadSourcePageFromDB" channel="sourcePagesInfoChl" 
+		ref="loadSourcePageService" method="loadFromDB" auto-startup="true"> <int:poller 
+		fixed-rate="120000" /> </int:inbound-channel-adapter> -->
+
 	<int:inbound-channel-adapter id="loadActiveSPFromDB"
-		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadActiveSPFromDB" auto-startup="true">
+		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadActiveSPFromDB"
+		auto-startup="true">
 		<int:poller fixed-rate="120000" />
 	</int:inbound-channel-adapter>
-	
+
 	<int:inbound-channel-adapter id="loadSubscribedSPFromDB"
-		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadSubscribedSPFromDB" auto-startup="true">
+		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadSubscribedSPFromDB"
+		auto-startup="true">
 		<int:poller fixed-rate="60000" />
 	</int:inbound-channel-adapter>
 
 	<int:splitter input-channel="sourcePagesInfoChl"
 		output-channel="singleSourcePageInfoChl" />
 
-	<int:service-activator id="downloadSourcePage" 
-		input-channel="singleSourcePageInfoChl" output-channel="downloadedSourcePageChl" 
+	<int:service-activator id="downloadSourcePage"
+		input-channel="singleSourcePageInfoChl" output-channel="downloadedSourcePageChl"
 		ref="downloadSourcePageService" method="download" />
-		
-	
-	<int:service-activator id="filterSourcePage" 
-		input-channel="downloadedSourcePageChl" output-channel="filteredSourcePageChl" 
+
+
+	<int:service-activator id="filterSourcePage"
+		input-channel="downloadedSourcePageChl" output-channel="filteredSourcePageChl"
 		ref="filterSourcePageService" method="filterSourcePage" />
-		
+
 	<!-- TODO check md5 -->
-	
-	<int:service-activator id="md5CheckSourcePage" 
-		input-channel="filteredSourcePageChl" output-channel="md5CheckedSourcePageChl" 
+
+	<int:service-activator id="md5CheckSourcePage"
+		input-channel="filteredSourcePageChl" output-channel="md5CheckedSourcePageChl"
 		ref="md5CheckService" method="check" />
-		
-	<int:router input-channel="md5CheckedSourcePageChl" expression="payload.category">
-		<int:mapping value="T" channel="pengdingStoreSPInFileChl"/>		
-		<int:mapping value="N" channel="pendingStoreSPInDBChl"/>		
+
+	<int:router input-channel="md5CheckedSourcePageChl"
+		expression="payload.category">
+		<int:mapping value="T" channel="pengdingStoreSPInFileChl" />
+		<int:mapping value="N" channel="pendingStoreSPInDBChl" />
 	</int:router>
-		
-	<int:service-activator id="storeFitUrl" 
-		input-channel="pengdingStoreSPInFileChl" 
-		ref="storeFitUrlService" method="store" />
-	
-	<int:service-activator id="updateSubSPForNaviSP" 
-		input-channel="pendingStoreSPInDBChl"
-		ref="updateSubSPForNaviSPService" method="update" />
-	
+
+	<int:service-activator id="storeFitUrl"
+		input-channel="pengdingStoreSPInFileChl" ref="storeFitUrlService"
+		method="store" />
+
+	<int:service-activator id="updateSubSPForNaviSP"
+		input-channel="pendingStoreSPInDBChl" ref="updateSubSPForNaviSPService"
+		method="update" />
+
 
 	<!-- channels -->
 	<int:channel id="sourcePagesInfoChl" />
 	<int:channel id="singleSourcePageInfoChl">
 		<int:dispatcher task-executor="processSourcePageExecutor" />
 	</int:channel>
-	<int:channel id="downloadedSourcePageChl"/>
-	<int:channel id="filteredSourcePageChl"/>
-	<int:channel id="md5CheckedSourcePageChl"/>
-	<int:channel id="pengdingStoreSPInFileChl"/>
-	<int:channel id="pendingStoreSPInDBChl"/>
+	<int:channel id="downloadedSourcePageChl" />
+	<int:channel id="filteredSourcePageChl" />
+	<int:channel id="md5CheckedSourcePageChl" />
+	<int:channel id="pengdingStoreSPInFileChl" />
+	<int:channel id="pendingStoreSPInDBChl" />
 
 
 	<task:executor id="processSourcePageExecutor" pool-size="5-20"
