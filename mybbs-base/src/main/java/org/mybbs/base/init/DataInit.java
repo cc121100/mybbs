@@ -11,11 +11,13 @@ import org.junit.runner.RunWith;
 import org.mybbs.base.constants.BaseConstants;
 import org.mybbs.base.dao.FilterDAO;
 import org.mybbs.base.dao.SourcePageDAO;
+import org.mybbs.base.dao.SourcePageSampleDAO;
 import org.mybbs.base.dao.UserSettingDAO;
 import org.mybbs.base.model.Filter;
 import org.mybbs.base.model.SourcePage;
 import org.mybbs.base.model.SourcePageFilter;
 import org.mybbs.base.model.SourcePageFilterDetail;
+import org.mybbs.base.model.SourcePageSample;
 import org.mybbs.base.model.UserSetting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -41,6 +43,9 @@ public class DataInit {
 	
 	@Autowired
 	private UserSettingDAO userSettingDAO;
+	
+	@Autowired
+	private SourcePageSampleDAO sourcePageSampleDAO;
 	
 
 	@Test
@@ -180,7 +185,7 @@ public class DataInit {
 			System.out.println(filter.getFilterName());
 		}*/
 		
-		List<SourcePage> sourcePageList =  sourcePageDAO.getSourcePagesByStatusAndCategory("A", BaseConstants.SP_CATEGORY_T);
+		/*List<SourcePage> sourcePageList =  sourcePageDAO.getSourcePagesByStatusAndCategory("A", BaseConstants.SP_CATEGORY_T);
 		for(SourcePage sp :sourcePageList){
 			
 			System.out.println(sp.getTargetPageName() + ":" + sp.getSourcePageFilters().size());
@@ -190,7 +195,7 @@ public class DataInit {
 					System.out.println("    " + spfd.getId());
 				}
 			}
-		}
+		}*/
 	}
 
 	@Test
@@ -203,12 +208,15 @@ public class DataInit {
 		
 		//sourcePage
 		
-		SourcePage sourcePage = new SourcePage();
+		/*SourcePage sourcePage = new SourcePage();
 		sourcePage.setTargetPageName("天涯论坛首页热帖Sample");
 		sourcePage.setTargetPageUrl("http://bbs.tianya.cn");
 		sourcePage.setStatus("A");
 		sourcePage.setDomainName("http://bbs.tianya.cn");
-		sourcePage.setCategory(BaseConstants.SP_CATEGORY_S);
+		sourcePage.setCategory(BaseConstants.SP_CATEGORY_S);*/
+		
+		SourcePageSample spSampleTianya = new SourcePageSample();
+		spSampleTianya.setSampleName("天涯论坛首页热帖Sample");
 		
 		
 		List<SourcePageFilter> sourcePageFilters = new ArrayList<SourcePageFilter>();
@@ -219,7 +227,7 @@ public class DataInit {
 		/*List<SourcePage> spList = new ArrayList<SourcePage>();
 		spList.add(sourcePage);
 		pageFilter1.setSourcePages(spList);*/
-		pageFilter1.setSourcePage(sourcePage);
+		pageFilter1.setSourcePageSample(spSampleTianya);
 		pageFilter1.setSeqNum(1);
 		
 		List<SourcePageFilterDetail> detailList1 = new ArrayList<SourcePageFilterDetail>();
@@ -241,7 +249,7 @@ public class DataInit {
 		pageFilter2.setSourcePageFilterName("ul");
 		
 //		pageFilter2.setSourcePages(spList);
-		pageFilter2.setSourcePage(sourcePage);
+		pageFilter2.setSourcePageSample(spSampleTianya);
 		pageFilter2.setSeqNum(2);
 		
 		List<SourcePageFilterDetail> detailList2 = new ArrayList<SourcePageFilterDetail>();
@@ -262,7 +270,7 @@ public class DataInit {
 		SourcePageFilter pageFilter3 = new SourcePageFilter();
 		pageFilter3.setSourcePageFilterName("li");
 //		pageFilter3.setSourcePages(spList);
-		pageFilter3.setSourcePage(sourcePage);
+		pageFilter3.setSourcePageSample(spSampleTianya);
 		pageFilter3.setSeqNum(3);
 		
 		List<SourcePageFilterDetail> detailList3 = new ArrayList<SourcePageFilterDetail>();
@@ -283,7 +291,7 @@ public class DataInit {
 		SourcePageFilter pageFilter4 = new SourcePageFilter();
 		pageFilter4.setSourcePageFilterName("AndFilter");
 //		pageFilter4.setSourcePages(spList);
-		pageFilter4.setSourcePage(sourcePage);
+		pageFilter4.setSourcePageSample(spSampleTianya);
 		pageFilter4.setSeqNum(4);
 		
 		List<SourcePageFilterDetail> detailList4 = new ArrayList<SourcePageFilterDetail>();
@@ -325,8 +333,8 @@ public class DataInit {
 		sourcePageFilters.add(pageFilter4);
 		
 		
-		sourcePage.setSourcePageFilters(sourcePageFilters);
-		sourcePageDAO.saveAndFlush(sourcePage);
+		spSampleTianya.setSourcePageFilters(sourcePageFilters);
+		sourcePageSampleDAO.saveAndFlush(spSampleTianya);
 		
 		SourcePage sourcePage2 = new SourcePage();
 		sourcePage2.setTargetPageName("天涯论坛首页热帖");
@@ -334,27 +342,30 @@ public class DataInit {
 		sourcePage2.setStatus("A");
 		sourcePage2.setDomainName("http://bbs.tianya.cn");
 		sourcePage2.setCategory(BaseConstants.SP_CATEGORY_T);
-		sourcePage2.setSampleSPId(sourcePage.getId());
+		sourcePage2.setSourcePageSampleId(spSampleTianya.getId());
 		sourcePageDAO.saveAndFlush(sourcePage2);
 		
 		
 		//jianshu.io
-		SourcePage jianshu = new SourcePage();
+		/*SourcePage jianshu = new SourcePage();
 		jianshu.setTargetPageName("简书首页Sample");
 		jianshu.setTargetPageUrl("http://jianshu.io");
 		jianshu.setStatus("A");
 		jianshu.setDomainName("http://jianshu.io");
-		jianshu.setCategory(BaseConstants.SP_CATEGORY_S);
+		jianshu.setCategory(BaseConstants.SP_CATEGORY_S);*/
+		
+		SourcePageSample spSampleJianShu = new SourcePageSample();
+		spSampleJianShu.setSampleName("简书首页Sample");
 		
 		List<SourcePageFilter> jiaoshuFilters = new ArrayList<SourcePageFilter>();
 		
 		//new HasAttributeFilter("_tystat", "热帖榜");
 		SourcePageFilter jianshuFilter1 = new SourcePageFilter();
 		jianshuFilter1.setSourcePageFilterName("jianshu filter");
-		List<SourcePage> jianshuSps = new ArrayList<SourcePage>();
-		jianshuSps.add(jianshu);
+		//List<SourcePage> jianshuSps = new ArrayList<SourcePage>();
+		//jianshuSps.add(jianshu);
 //		jianshuFilter1.setSourcePages(jianshuSps);
-		jianshuFilter1.setSourcePage(jianshu);
+		jianshuFilter1.setSourcePageSample(spSampleJianShu);
 		jianshuFilter1.setSeqNum(1);
 		
 		List<SourcePageFilterDetail> jianshuDetailList1 = new ArrayList<SourcePageFilterDetail>();
@@ -409,9 +420,9 @@ public class DataInit {
 		
 		
 		jiaoshuFilters.add(jianshuFilter1);
-		jianshu.setSourcePageFilters(jiaoshuFilters);
+		spSampleJianShu.setSourcePageFilters(jiaoshuFilters);
 		
-		sourcePageDAO.saveAndFlush(jianshu);
+		sourcePageSampleDAO.saveAndFlush(spSampleJianShu);
 		
 		SourcePage jianshu2 = new SourcePage();
 		jianshu2.setTargetPageName("简书首页");
@@ -419,7 +430,7 @@ public class DataInit {
 		jianshu2.setStatus("A");
 		jianshu2.setDomainName("http://jianshu.io");
 		jianshu2.setCategory(BaseConstants.SP_CATEGORY_T);
-		jianshu2.setSampleSPId(jianshu.getId());
+		jianshu2.setSourcePageSampleId(spSampleJianShu.getId());
 		sourcePageDAO.saveAndFlush(jianshu2);
 		
 		
@@ -432,16 +443,21 @@ public class DataInit {
 			System.out.println(us.getSourcePages().size());
 		}*/
 		
-		SourcePage sp = sourcePageDAO.findOne("4028e5e4473da73501473da740cb000c");
+		/*SourcePage sp = sourcePageDAO.findOne("4028e5e4473da73501473da740cb000c");
 		List<SourcePage> spList = new ArrayList<SourcePage>();
 		spList.add(sp);
-		lazyLoadSPFilters(spList);
+		lazyLoadSPFilters(spList);*/
+		
+		List<SourcePage> spList = sourcePageDAO.getDefaultSP();
+		for(SourcePage sp: spList){
+			System.out.println(sp.getTargetPageName());
+		}
 		
 	}
 	
-	private void lazyLoadSPFilters(List<SourcePage> spList){
-		for(SourcePage sp : spList){
-			sp.getSourcePageFilters().size();
+	private void lazyLoadSPFilters(List<SourcePageSample> spsList){
+		for(SourcePageSample sps : spsList){
+			sps.getSourcePageFilters().size();
 		}
 	}
 }

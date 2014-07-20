@@ -29,6 +29,7 @@ import org.mybbs.base.model.Filter;
 import org.mybbs.base.model.SourcePage;
 import org.mybbs.base.model.SourcePageFilter;
 import org.mybbs.base.model.SourcePageFilterDetail;
+import org.mybbs.base.model.SourcePageSample;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -46,13 +47,18 @@ public class FilterSourcePageService {
 		String htmlStr = loadPageFileAsString(pageFilePath);
 
 		// 2. get fit urls
-		Map<String,String> map = parseHtml(htmlStr, sourcePage.getSampleSourcePage());
+		Map<String,String> map = parseHtml(htmlStr, sourcePage.getSpSample(), sourcePage.getTargetPageName());
 		
 		sourcePage.setUrlAndContentMap(map);
 		
-		logger.info("End filter Source page");
+		logger.info("End filter Source page with source page count:" + map.keySet().size());
+		
+		if(map.keySet().size() > 0){
+			return sourcePage;
+		}else{
+			return null;
+		}
 
-		return sourcePage;
 	}
 
 	public String loadPageFileAsString(String pageFilePath) {
@@ -81,15 +87,15 @@ public class FilterSourcePageService {
 	 * @param sourcePage
 	 * @return key: href value: xxx, <a href=''>xxx</a>
 	 */
-	public Map<String,String> parseHtml(String htmlStr, SourcePage sourcePage) {
+	public Map<String,String> parseHtml(String htmlStr, SourcePageSample sps, String targetPageName) {
 		
-		logger.info("Parse html for source page: "+ sourcePage.getTargetPageName());
+		logger.info("Parse html for source page: "+ targetPageName);
 		
 		Map<String, String> resultMap = new LinkedHashMap<String, String>();
-		List<SourcePageFilter> sourcePageFilters = sourcePage.getSourcePageFilters();
+		List<SourcePageFilter> sourcePageFilters = sps.getSourcePageFilters();
 		
 		if (sourcePageFilters == null || sourcePageFilters.size() < 1) {
-			logger.error("Error occurs when parse html, sourcePageFilter list is null or empty for source page: "+ sourcePage.getTargetPageName());
+			logger.error("Error occurs when parse html, sourcePageFilter list is null or empty for source page: "+ targetPageName);
 			return null;
 		}
 
@@ -140,7 +146,7 @@ public class FilterSourcePageService {
 				Matcher m = p.matcher(node.toHtml());
 				while (m.find()) {
 					String link = m.group(1).trim();
-					resultMap.put(link, node.toPlainTextString());
+					resultMap.put(link, node.toPlainTextString().trim());
 				}
 			}
 

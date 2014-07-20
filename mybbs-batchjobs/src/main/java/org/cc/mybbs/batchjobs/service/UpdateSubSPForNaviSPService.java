@@ -32,15 +32,15 @@ public class UpdateSubSPForNaviSPService {
 			 *		add all the sub source pages 
 			*/
 			
-			List<SourcePage> oldSubSPList = sourcePageDAO.getAllSubSPForSampleSP(sourcePage.getId());
+			List<SourcePage> oldSubSPList = sourcePageDAO.getAllSubSPForSampleSP(sourcePage.getSampleSPIdForNaviSP(),BaseConstants.SP_CATEGORY_T);
 			List<SourcePage> newSubSPList =  generateNewSubSPList(sourcePage);
 			
-			if(oldSubSPList != null && oldSubSPList.size() > 0){
+			if(oldSubSPList == null || oldSubSPList.size() < 1){
 				
 				logger.info("First time update sub source pages for source page :" + sourcePage.getId());
-				sourcePageDAO.save((Iterable<SourcePage>)newSubSPList.iterator());
+				sourcePageDAO.save(newSubSPList);
 				sourcePageDAO.flush();
-				logger.info("Successfully add new sub source pages, with count " + oldSubSPList.size());
+				logger.info("Successfully add new sub source pages, with count " + newSubSPList.size());
 				
 			}else{
 				
@@ -101,7 +101,7 @@ public class UpdateSubSPForNaviSPService {
 					}
 				}
 				
-				sourcePageDAO.save((Iterable<SourcePage>)oldSubSPList.iterator());
+				sourcePageDAO.save(oldSubSPList);
 				sourcePageDAO.flush();
 				logger.info("Successfully update sub source pages, with count " + oldSubSPList.size());
 				
@@ -113,23 +113,23 @@ public class UpdateSubSPForNaviSPService {
 		
 	}
 	
-	private List<SourcePage> generateNewSubSPList(SourcePage sampleSP){
+	private List<SourcePage> generateNewSubSPList(SourcePage navicateSP){
 		
 		List<SourcePage> newSubSPList = new ArrayList<SourcePage>();
 		SourcePage newSubSP = null;
-		for(Entry<String, String> entry : sampleSP.getUrlAndContentMap().entrySet()){
+		for(Entry<String, String> entry : navicateSP.getUrlAndContentMap().entrySet()){
 			newSubSP = new SourcePage();
-			newSubSP.setTargetPageName(sampleSP.getUniqueLabel() + " - " + entry.getValue());
-			newSubSP.setTargetPageUrl(sampleSP.getDomainName() + "/" + entry.getKey());
-			newSubSP.setUniqueLabel(sampleSP.getUniqueLabel() + " - " + entry.getValue());
+			newSubSP.setTargetPageName(navicateSP.getUniqueLabel() + " - " + entry.getValue());
+			newSubSP.setTargetPageUrl(navicateSP.getDomainName()  + entry.getKey());
+			newSubSP.setUniqueLabel(navicateSP.getUniqueLabel() + " - " + entry.getValue());
 			newSubSP.setStatus(BaseConstants.STATUA_A);
 			newSubSP.setCategory(BaseConstants.SP_CATEGORY_T);
-			if(StringUtils.isEmpty(sampleSP.getSubSPDomainName())){
-				newSubSP.setDomainName(sampleSP.getDomainName());
+			if(StringUtils.isEmpty(navicateSP.getSubSPDomainName())){
+				newSubSP.setDomainName(navicateSP.getDomainName());
 			}else{
-				newSubSP.setDomainName(sampleSP.getSubSPDomainName());
+				newSubSP.setDomainName(navicateSP.getSubSPDomainName());
 			}
-			newSubSP.setSampleSPId(sampleSP.getId());
+			newSubSP.setSourcePageSampleId(navicateSP.getSampleSPIdForNaviSP());
 			
 			newSubSPList.add(newSubSP);
 		}

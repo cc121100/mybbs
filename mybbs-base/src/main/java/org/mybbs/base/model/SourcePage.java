@@ -59,17 +59,20 @@ public class SourcePage extends BaseModel {
 			inverseJoinColumns = @JoinColumn(name="source_pagefilter_id",referencedColumnName = "id"),
 			uniqueConstraints = @UniqueConstraint(columnNames={"source_page_id" ,"source_pagefilter_id"})
 	)*/
-	@OneToMany(cascade = CascadeType.PERSIST, mappedBy="sourcePage",fetch = FetchType.LAZY)
+	/*@OneToMany(cascade = CascadeType.PERSIST, mappedBy="sourcePage",fetch = FetchType.LAZY)
 	//@LazyCollection(LazyCollectionOption.TRUE)
-	private List<SourcePageFilter> sourcePageFilters;
+	private List<SourcePageFilter> sourcePageFilters;*/
 	
 	@ManyToMany(mappedBy = "sourcePages")
 	//@JoinColumn(name = "page_id")
 	private List<UserSetting> userSettings;
 	
 	//@OneToOne(fetch = FetchType.LAZY)
-	@Column(name = "sample_sp_id")
-	private String sampleSPId;
+	@Column(name = "sp_sample_id")
+	private String sourcePageSampleId;
+	
+	@Column(name="sample_sp_id_for_navi_sp")
+	private String sampleSPIdForNaviSP;
 	
 	@Column(name = "sub_sp_domain_name")
 	private String subSPDomainName;
@@ -78,7 +81,7 @@ public class SourcePage extends BaseModel {
 	private String uniqueLabel;
 	
 	@Transient
-	private SourcePage sampleSourcePage;
+	private SourcePageSample spSample;
 	
 	@Transient
 	private Map<String, String> urlAndContentMap;
@@ -140,13 +143,13 @@ public class SourcePage extends BaseModel {
 		this.md5Code = md5Code;
 	}
 
-	public List<SourcePageFilter> getSourcePageFilters() {
+	/*public List<SourcePageFilter> getSourcePageFilters() {
 		return sourcePageFilters;
 	}
 
 	public void setSourcePageFilters(List<SourcePageFilter> sourcePageFilters) {
 		this.sourcePageFilters = sourcePageFilters;
-	}
+	}*/
 
 	public Map<String, String> getUrlAndContentMap() {
 		return urlAndContentMap;
@@ -164,20 +167,21 @@ public class SourcePage extends BaseModel {
 		this.userSettings = userSettings;
 	}
 
-	public SourcePage getSampleSourcePage() {
-		return sampleSourcePage;
+
+	public SourcePageSample getSpSample() {
+		return spSample;
 	}
 
-	public void setSampleSourcePage(SourcePage sampleSourcePage) {
-		this.sampleSourcePage = sampleSourcePage;
+	public void setSpSample(SourcePageSample spSample) {
+		this.spSample = spSample;
 	}
 
-	public String getSampleSPId() {
-		return sampleSPId;
+	public String getSourcePageSampleId() {
+		return sourcePageSampleId;
 	}
 
-	public void setSampleSPId(String sampleSPId) {
-		this.sampleSPId = sampleSPId;
+	public void setSourcePageSampleId(String sourcePageSampleId) {
+		this.sourcePageSampleId = sourcePageSampleId;
 	}
 
 	public String getSubSPDomainName() {
@@ -196,6 +200,14 @@ public class SourcePage extends BaseModel {
 		this.uniqueLabel = uniqueLabel;
 	}
 	
+	public String getSampleSPIdForNaviSP() {
+		return sampleSPIdForNaviSP;
+	}
+
+	public void setSampleSPIdForNaviSP(String sampleSPIdForNaviSP) {
+		this.sampleSPIdForNaviSP = sampleSPIdForNaviSP;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -32,8 +32,8 @@ public class SourcePageFilter extends BaseModel {
 	private List<SourcePage> sourcePages;*/
 	
 	@ManyToOne
-	@JoinColumn(name = "source_page_id")
-	private SourcePage sourcePage;
+	@JoinColumn(name = "sp_sample_id")
+	private SourcePageSample sourcePageSample;
 	
 	@OneToMany(cascade = CascadeType.PERSIST, mappedBy="sourcePageFilter")
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -55,12 +55,13 @@ public class SourcePageFilter extends BaseModel {
 	}
 
 
-	public SourcePage getSourcePage() {
-		return sourcePage;
+
+	public SourcePageSample getSourcePageSample() {
+		return sourcePageSample;
 	}
 
-	public void setSourcePage(SourcePage sourcePage) {
-		this.sourcePage = sourcePage;
+	public void setSourcePageSample(SourcePageSample sourcePageSample) {
+		this.sourcePageSample = sourcePageSample;
 	}
 
 	public List<SourcePageFilterDetail> getSourcePageFilterDetails() {

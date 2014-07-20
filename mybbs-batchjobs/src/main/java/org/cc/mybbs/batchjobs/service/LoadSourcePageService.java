@@ -10,10 +10,14 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.cc.mybbs.batchjobs.utils.LazyLoadUtils;
+import org.cc.mybbs.batchjobs.utils.SPSamplePool;
 import org.mybbs.base.constants.BaseConstants;
 import org.mybbs.base.dao.SourcePageDAO;
+import org.mybbs.base.dao.SourcePageSampleDAO;
 import org.mybbs.base.dao.UserSettingDAO;
 import org.mybbs.base.model.SourcePage;
+import org.mybbs.base.model.SourcePageSample;
 import org.mybbs.base.model.UserSetting;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,14 +34,33 @@ public class LoadSourcePageService {
 	@Autowired
 	UserSettingDAO userSettingDAO;
 	
+	@Autowired
+	SourcePageSampleDAO sourcePageSampleDAO;
 	
-	/*public List<SourcePage> loadFromDB(){
-		logger.info("Load active source page from db");
+	@Transactional
+	public List<SourcePage> loadNavicateSPFromDB(){
 		
-		List<SourcePage> sourcePageList = sourcePageDAO.getSourcePagesByStatusAndCategory(BaseConstants.STATUA_A,BaseConstants.SP_CATEGORY_T);
-		logger.info("Successed load active sourcePage list from db, size:" + sourcePageList.size());
-		return  sourcePageList;
-	}*/
+		try{
+			// 1. load active sample SP 
+			logger.info("--- loadNavicateSPFromDB ---");
+			logger.info("Load smaple source page from db");
+			//List<SourcePage> sampleSPList = sourcePageDAO.getSourcePagesByStatusAndCategory(BaseConstants.STATUA_A,BaseConstants.SP_CATEGORY_S);
+			List<SourcePageSample> spsList = getSPSList();
+			
+			// 2. load active navicate SP
+			logger.info("Load navicate source page from db");
+			List<SourcePage> targetSPList = sourcePageDAO.getSourcePagesByStatusAndCategory(BaseConstants.STATUA_A,BaseConstants.SP_CATEGORY_N);
+			
+			// 3. generate active navicate SP
+			List<SourcePage> resultSPList = generateTargetSP(spsList, targetSPList);
+			
+			return resultSPList;
+		}catch(Exception e){
+			logger.error("Error occurs when loadNavicateSPFromDB :", e);
+			return null;
+		}
+		
+	}
 	
 	@Transactional
 	public List<SourcePage> loadActiveSPFromDB(){
@@ -46,18 +69,19 @@ public class LoadSourcePageService {
 			// 1. load active sample SP 
 			logger.info("--- loadActiveSPFromDB ---");
 			logger.info("Load smaple source page from db");
-			List<SourcePage> sampleSPList = sourcePageDAO.getSourcePagesByStatusAndCategory(BaseConstants.STATUA_A,BaseConstants.SP_CATEGORY_S);
-			lazyLoadSPFilters(sampleSPList);
+			//List<SourcePage> sampleSPList = sourcePageDAO.getSourcePagesByStatusAndCategory(BaseConstants.STATUA_A,BaseConstants.SP_CATEGORY_S);
+			
+			List<SourcePageSample> spsList = getSPSList();
 			
 			// 2. load active target SP
-			logger.info("Load target source page from db");
+			logger.info("Load active source page from db");
 			List<SourcePage> targetSPList = sourcePageDAO.getSourcePagesByStatusAndCategory(BaseConstants.STATUA_A,BaseConstants.SP_CATEGORY_T);
 			
 			// 3. generate active target SP
-			List<SourcePage> resultSPList = generateTargetSP(sampleSPList, targetSPList);
+			List<SourcePage> resultSPList = generateTargetSP(spsList, targetSPList);
 			
 			return resultSPList;
-		}catch(Exception e){
+		}catch(Exception e){ 
 			logger.error("Error occurs when loadActiveSPFromDB :", e);
 			return null;
 		}
@@ -71,21 +95,23 @@ public class LoadSourcePageService {
 			// 1. load active sample SP 
 			logger.info("--- loadSubscribedSPFromDB ---");
 			logger.info("Load smaple source page from db");
-			List<SourcePage> sampleSPList = sourcePageDAO.getSourcePagesByStatusAndCategory(BaseConstants.STATUA_A,BaseConstants.SP_CATEGORY_S);
-			lazyLoadSPFilters(sampleSPList);
+			//List<SourcePage> sampleSPList = sourcePageDAO.getSourcePagesByStatusAndCategory(BaseConstants.STATUA_A,BaseConstants.SP_CATEGORY_S);
+			List<SourcePageSample> spsList = getSPSList();
 			
 			// 2. Load Subscribed SP
-			logger.info("Load target source page from db");
-			List<UserSetting> usList = userSettingDAO.getUserSettingByCategory(BaseConstants.US_CATEGORY_U);
+			logger.info("Load Subscribed source page from db");
+			/*List<UserSetting> usList = userSettingDAO.getUserSettingByCategory(BaseConstants.US_CATEGORY_U);
 			Set<SourcePage> targetSPSet = new HashSet<SourcePage>();
 			for(UserSetting us : usList){
 				if(us.getSourcePages() != null && us.getSourcePages().size() > 0){
 					targetSPSet.addAll(us.getSourcePages());
 				}
-			}
+			}*/
+			
+			List<SourcePage> spList = sourcePageDAO.getAllSubscibedSP();
 			
 			// 3. generate active target SP
-			List<SourcePage> resultSPList = generateTargetSP(sampleSPList, targetSPSet);
+			List<SourcePage> resultSPList = generateTargetSP(spsList, spList);
 			return resultSPList;
 			
 		}catch(Exception e){
@@ -96,14 +122,46 @@ public class LoadSourcePageService {
 	
 	@Transactional
 	public List<SourcePage> loadLoginedAndDefaultSPFromDB(){
-		return null;
+		try{
+			// 1. load active sample SP 
+			logger.info("--- loadLoginedAndDefaultSPFromDB ---");
+			logger.info("Load smaple source page from db");
+			//List<SourcePage> sampleSPList = sourcePageDAO.getSourcePagesByStatusAndCategory(BaseConstants.STATUA_A,BaseConstants.SP_CATEGORY_S);
+			List<SourcePageSample> spsList = getSPSList();
+			
+			// 2. Load Subscribed SP
+			logger.info("Load target source page from db");
+			/*List<UserSetting> usList = userSettingDAO.getUserSettingByCategory(BaseConstants.US_CATEGORY_D);
+			Set<SourcePage> targetSPSet = new HashSet<SourcePage>();
+			for(UserSetting us : usList){
+				if(us.getSourcePages() != null && us.getSourcePages().size() > 0){
+					targetSPSet.addAll(us.getSourcePages());
+				}
+			}*/
+			
+			
+			List<SourcePage> spList = new ArrayList<SourcePage>();
+			List<SourcePage> defaultSPList = sourcePageDAO.getDefaultSP();
+			spList.addAll(defaultSPList);
+			
+			// TODO 3. get all login usersettings' sourcepage
+			
+			
+			// 3. generate active target SP
+			List<SourcePage> resultSPList = generateTargetSP(spsList, spList);
+			return resultSPList;
+			
+		}catch(Exception e){
+			logger.error("Error occurs when loadSubscribedSPFromDB :", e);
+			return null;
+		}
 	}
 	
 	
-	private List<SourcePage> generateTargetSP(List<SourcePage> sampleSPList,Collection<SourcePage> targetSPList){
+	private List<SourcePage> generateTargetSP(List<SourcePageSample> spsList,Collection<SourcePage> targetSPList){
 		
 		List<SourcePage> resultList = new ArrayList<SourcePage>();
-		if(sampleSPList == null || sampleSPList.size() < 1
+		if(spsList == null || spsList.size() < 1
 				|| targetSPList == null || targetSPList.size() < 1){
 			return resultList;
 		}
@@ -114,11 +172,11 @@ public class LoadSourcePageService {
 		while(it.hasNext()){
 			targetSP = it.next();
 			
-			if(StringUtils.isNotEmpty(targetSP.getSampleSPId())){
+			if(StringUtils.isNotEmpty(targetSP.getSourcePageSampleId())){
 				
-				for(int j = 0; j < sampleSPList.size(); j++){
-					if(targetSP.getSampleSPId().equals(sampleSPList.get(j).getId())){
-						targetSP.setSampleSourcePage(sampleSPList.get(j));
+				for(int j = 0; j < spsList.size(); j++){
+					if(targetSP.getSourcePageSampleId().equals(spsList.get(j).getId())){
+						targetSP.setSpSample(spsList.get(j));
 						resultList.add(targetSP);
 						break;
 					}
@@ -130,9 +188,18 @@ public class LoadSourcePageService {
 	}
 	
 	
-	private void lazyLoadSPFilters(List<SourcePage> spList){
-		for(SourcePage sp : spList){
-			sp.getSourcePageFilters().size();
+	/*private void lazyLoadSPFilters(List<SourcePageSample> spsList){
+		for(SourcePageSample sps : spsList){
+			sps.getSourcePageFilters().size();
 		}
+	}*/
+	
+	private List<SourcePageSample> getSPSList(){
+		List<SourcePageSample> spsList = SPSamplePool.getSpsList();
+		if(spsList == null || spsList.size() < 1){
+			spsList = sourcePageSampleDAO.findAll();
+			LazyLoadUtils.lazyLoadSPFilters(spsList);
+		}
+		return spsList;
 	}
 }

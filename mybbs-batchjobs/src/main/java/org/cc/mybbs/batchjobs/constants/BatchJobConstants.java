@@ -21,6 +21,8 @@ public class BatchJobConstants {
 	
 	//public static String REGEX_HREF = "<a\\s+href\\s*=\\s*\"?(.*?)[\"|>]";
 	
-	public static String REGEX_HREF = "<a\\s.*?href\\s*=\\s*\'?\"?([^(\\s\")]+)\\s*\'?\"?[^>]*>(.*?)</a>";
+	public static String REGEX_HREF = "\\s.*?href\\s*=\\s*\'?\"?([^(\\s\")]+)\\s*\'?\"?[^>]*>(.*?)";
+	//public static String REGEX_HREF = "<a\\s.*?href=\"([^\"]+)\"[^>]*>(.*?)</a>";
+	//public static String REGEX_HREF = "\\s*(?i)href\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))";
 
 }

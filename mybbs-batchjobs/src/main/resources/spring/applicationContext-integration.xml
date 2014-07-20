@@ -18,31 +18,51 @@
 		http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd">
 
 	<import resource="classpath*:spring/applicationContext-base.xml" />
+	<import resource="classpath*:spring/applicationContext-jms.xml" />
 
 	<context:component-scan base-package="org.cc.mybbs.batchjobs" />
 	<!-- <int:annotation-config /> -->
 	<!-- <context:property-placeholder location="classpath*:/*.properties"/> -->
 
 	<!-- TODO get notice message from JMS -->
-
-	<!-- <int:inbound-channel-adapter id="loadSourcePageFromDB" channel="sourcePagesInfoChl" 
-		ref="loadSourcePageService" method="loadFromDB" auto-startup="true"> <int:poller 
-		fixed-rate="120000" /> </int:inbound-channel-adapter> -->
+	
+	<int:control-bus input-channel="sourcePagesInfoChl"/>
 
 	<int:inbound-channel-adapter id="loadActiveSPFromDB"
 		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadActiveSPFromDB"
-		auto-startup="true">
+		auto-startup="false">
 		<int:poller fixed-rate="120000" />
 	</int:inbound-channel-adapter>
 
+	<int:inbound-channel-adapter id="loadNavicateSPFromDB"
+		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadNavicateSPFromDB"
+		auto-startup="false">
+		<int:poller fixed-rate="120000"/>
+	</int:inbound-channel-adapter>
+	<!-- cron="0 15 9 * * *" -->
+
 	<int:inbound-channel-adapter id="loadSubscribedSPFromDB"
 		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadSubscribedSPFromDB"
-		auto-startup="true">
+		auto-startup="false">
 		<int:poller fixed-rate="60000" />
 	</int:inbound-channel-adapter>
 
+	<int:inbound-channel-adapter id="loadLoginedAndDefaultSPFromDB"
+		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadLoginedAndDefaultSPFromDB"
+		auto-startup="false">
+		<int:poller fixed-rate="120000" />
+	</int:inbound-channel-adapter>
+
+	<jms:message-driven-channel-adapter
+		id="getLoginUserJMS" channel="loginUserJMSInChl" destination="inQueue"
+		auto-startup="true" />
+
+	<int:service-activator id="updateUser"
+		input-channel="loginUserJMSInChl" ref="updateLoginUserService" method="handleMessage" />
+
 	<int:splitter input-channel="sourcePagesInfoChl"
 		output-channel="singleSourcePageInfoChl" />
+
 
 	<int:service-activator id="downloadSourcePage"
 		input-channel="singleSourcePageInfoChl" output-channel="downloadedSourcePageChl"
@@ -75,6 +95,8 @@
 
 
 	<!-- channels -->
+	<int:channel id="loginUserJMSInChl" />
+	<int:channel id="loginUserJMSOutChl" />
 	<int:channel id="sourcePagesInfoChl" />
 	<int:channel id="singleSourcePageInfoChl">
 		<int:dispatcher task-executor="processSourcePageExecutor" />
@@ -86,7 +108,7 @@
 	<int:channel id="pendingStoreSPInDBChl" />
 
 
-	<task:executor id="processSourcePageExecutor" pool-size="5-20"
-		queue-capacity="20" keep-alive="120" />
+	<task:executor id="processSourcePageExecutor" pool-size="100-500"
+		queue-capacity="500" keep-alive="50000" />
 
 </beans>
