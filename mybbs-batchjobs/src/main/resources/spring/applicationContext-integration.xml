@@ -28,7 +28,7 @@
 	
 	<int:control-bus input-channel="sourcePagesInfoChl"/>
 
-	<int:inbound-channel-adapter id="loadActiveSPFromDB"
+	<!-- <int:inbound-channel-adapter id="loadActiveSPFromDB"
 		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadActiveSPFromDB"
 		auto-startup="false">
 		<int:poller fixed-rate="120000" />
@@ -39,13 +39,13 @@
 		auto-startup="false">
 		<int:poller fixed-rate="120000"/>
 	</int:inbound-channel-adapter>
-	<!-- cron="0 15 9 * * *" -->
+	cron="0 15 9 * * *"
 
 	<int:inbound-channel-adapter id="loadSubscribedSPFromDB"
 		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadSubscribedSPFromDB"
 		auto-startup="false">
 		<int:poller fixed-rate="60000" />
-	</int:inbound-channel-adapter>
+	</int:inbound-channel-adapter> -->
 
 	<int:inbound-channel-adapter id="loadLoginedAndDefaultSPFromDB"
 		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadLoginedAndDefaultSPFromDB"
