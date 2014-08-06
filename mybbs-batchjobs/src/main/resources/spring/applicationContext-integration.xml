@@ -47,11 +47,11 @@
 		<int:poller fixed-rate="60000" />
 	</int:inbound-channel-adapter> -->
 
-	<int:inbound-channel-adapter id="loadLoginedAndDefaultSPFromDB"
+	<!-- <int:inbound-channel-adapter id="loadLoginedAndDefaultSPFromDB"
 		channel="sourcePagesInfoChl" ref="loadSourcePageService" method="loadLoginedAndDefaultSPFromDB"
 		auto-startup="false">
 		<int:poller fixed-rate="120000" />
-	</int:inbound-channel-adapter>
+	</int:inbound-channel-adapter> -->
 
 	<jms:message-driven-channel-adapter
 		id="getLoginUserJMS" channel="loginUserJMSInChl" destination="inQueue"

@@ -22,7 +22,7 @@
 		
 	</bean>
 
-	<!-- jms Topic -->
+	<!-- jms Queue -->
 	<bean id="inQueue" class="org.apache.activemq.command.ActiveMQQueue"
 		autowire="constructor">
 		<constructor-arg value="jmsQueue" />

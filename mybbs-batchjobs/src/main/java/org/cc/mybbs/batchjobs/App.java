@@ -26,6 +26,6 @@ public class App
     	
     	//controlChannel.send(new GenericMessage<String>("@loadActiveSPFromDB.start()"));
     	//controlChannel.send(new GenericMessage<String>("@loadSubscribedSPFromDB.start()"));
-    	controlChannel.send(new GenericMessage<String>("@loadLoginedAndDefaultSPFromDB.start()"));
+    	//controlChannel.send(new GenericMessage<String>("@loadLoginedAndDefaultSPFromDB.start()"));
     }
 }

@@ -16,6 +16,6 @@ public class UpdateLoginUserService implements MessageHandler{
 	public void handleMessage(Message<?> msg)
 			throws MessagingException {
 		
-		System.err.println(new Date() + ", UpdateLoginUserService, " +msg.getPayload());
+		System.err.println(new Date() + ", UpdateLoginUserService, received msg: " +msg.getPayload());
 	}
 }

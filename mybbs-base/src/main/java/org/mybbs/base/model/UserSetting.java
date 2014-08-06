@@ -31,6 +31,9 @@ public class UserSetting extends BaseModel {
 	@Column(name="category" )
 	private String category;
 	
+	@Column(name="temp_cookie_id")
+	private String tempCookieId;
+	
 	
 	
 	@ManyToMany(cascade = CascadeType.PERSIST)
@@ -75,6 +78,15 @@ public class UserSetting extends BaseModel {
 	public void setCategory(String category) {
 		this.category = category;
 	}
+
+	public String getTempCookieId() {
+		return tempCookieId;
+	}
+
+	public void setTempCookieId(String tempCookieId) {
+		this.tempCookieId = tempCookieId;
+	}
+
 	
 
 }

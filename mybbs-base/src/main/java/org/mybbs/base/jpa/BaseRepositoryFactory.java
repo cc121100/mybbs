@@ -27,7 +27,6 @@ public class BaseRepositoryFactory extends JpaRepositoryFactory {
 
 	@Override
 	protected Class<?> getRepositoryBaseClass(RepositoryMetadata metadata) {
-		// TODO Auto-generated method stub
 		return BaseRepositoryImpl.class;
 	}
 	

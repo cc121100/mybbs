@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -30,6 +32,10 @@ public class SourcePageSample extends BaseModel{
 	@OneToMany(cascade = CascadeType.PERSIST, mappedBy="sourcePageSample",fetch = FetchType.LAZY)
 	//@LazyCollection(LazyCollectionOption.TRUE)
 	private List<SourcePageFilter> sourcePageFilters;
+	
+	@ManyToOne
+	@JoinColumn(name = "sp_category_id")
+	private SourcePageCategory sourcePageCategory;
 
 	public String getId() {
 		return id;
@@ -53,6 +59,14 @@ public class SourcePageSample extends BaseModel{
 
 	public void setSourcePageFilters(List<SourcePageFilter> sourcePageFilters) {
 		this.sourcePageFilters = sourcePageFilters;
+	}
+
+	public SourcePageCategory getSourcePageCategory() {
+		return sourcePageCategory;
+	}
+
+	public void setSourcePageCategory(SourcePageCategory sourcePageCategory) {
+		this.sourcePageCategory = sourcePageCategory;
 	}
 	
 	
