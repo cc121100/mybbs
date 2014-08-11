@@ -1,16 +1,21 @@
 package org.cc.mybbs.batchjobs.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.cc.mybbs.batchjobs.utils.LazyLoadUtils;
+import org.cc.mybbs.batchjobs.utils.MockSessionPool;
 import org.cc.mybbs.batchjobs.utils.SPSamplePool;
 import org.mybbs.base.constants.BaseConstants;
 import org.mybbs.base.dao.SourcePageDAO;
@@ -100,13 +105,6 @@ public class LoadSourcePageService {
 			
 			// 2. Load Subscribed SP
 			logger.info("Load Subscribed source page from db");
-			/*List<UserSetting> usList = userSettingDAO.getUserSettingByCategory(BaseConstants.US_CATEGORY_U);
-			Set<SourcePage> targetSPSet = new HashSet<SourcePage>();
-			for(UserSetting us : usList){
-				if(us.getSourcePages() != null && us.getSourcePages().size() > 0){
-					targetSPSet.addAll(us.getSourcePages());
-				}
-			}*/
 			
 			List<SourcePage> spList = sourcePageDAO.getAllSubscibedSP();
 			
@@ -126,26 +124,35 @@ public class LoadSourcePageService {
 			// 1. load active sample SP 
 			logger.info("--- loadLoginedAndDefaultSPFromDB ---");
 			logger.info("Load smaple source page from db");
-			//List<SourcePage> sampleSPList = sourcePageDAO.getSourcePagesByStatusAndCategory(BaseConstants.STATUA_A,BaseConstants.SP_CATEGORY_S);
 			List<SourcePageSample> spsList = getSPSList();
 			
 			// 2. Load Subscribed SP
 			logger.info("Load target source page from db");
-			/*List<UserSetting> usList = userSettingDAO.getUserSettingByCategory(BaseConstants.US_CATEGORY_D);
-			Set<SourcePage> targetSPSet = new HashSet<SourcePage>();
-			for(UserSetting us : usList){
-				if(us.getSourcePages() != null && us.getSourcePages().size() > 0){
-					targetSPSet.addAll(us.getSourcePages());
-				}
-			}*/
-			
-			
-			List<SourcePage> spList = new ArrayList<SourcePage>();
+			Set<SourcePage> spList = new HashSet<SourcePage>();
 			List<SourcePage> defaultSPList = sourcePageDAO.getDefaultSP();
 			spList.addAll(defaultSPList);
 			
-			// TODO 3. get all login usersettings' sourcepage
+			// 3. get all login usersettings' sourcepage
+			// remove over time sessions and get current sessions
+			Set<String> sessionSet = MockSessionPool.removeOverTimeSessions(new Date().getTime());
+			String[] sessionArr = new String[]{};
+			sessionArr = sessionSet.toArray(sessionArr);
 			
+			
+			if(sessionArr != null && sessionArr.length > 0){
+				
+				List<SourcePage> curSpList = null;
+				if(sessionArr.length <= 1000){
+					curSpList = sourcePageDAO.getCurSp(sessionArr);
+				}else{
+					String[] subArr = null;
+					for(int i = 0; i < (sessionArr.length / 1000 + 1); i++){
+						subArr = (String[]) ArrayUtils.subarray(sessionArr, (i * 1000), (i * 1000 + 1000));
+						curSpList = sourcePageDAO.getCurSp(subArr);
+					}
+				}
+				spList.addAll(curSpList);
+			}
 			
 			// 3. generate active target SP
 			List<SourcePage> resultSPList = generateTargetSP(spsList, spList);
@@ -186,13 +193,6 @@ public class LoadSourcePageService {
 		
 		return resultList;
 	}
-	
-	
-	/*private void lazyLoadSPFilters(List<SourcePageSample> spsList){
-		for(SourcePageSample sps : spsList){
-			sps.getSourcePageFilters().size();
-		}
-	}*/
 	
 	private List<SourcePageSample> getSPSList(){
 		List<SourcePageSample> spsList = SPSamplePool.getSpsList();

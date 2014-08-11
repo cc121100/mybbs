@@ -24,8 +24,9 @@ public class App
     	
     	MessageChannel controlChannel = ac.getBean("sourcePagesInfoChl", MessageChannel.class);
     	
+    	
     	//controlChannel.send(new GenericMessage<String>("@loadActiveSPFromDB.start()"));
     	//controlChannel.send(new GenericMessage<String>("@loadSubscribedSPFromDB.start()"));
-    	//controlChannel.send(new GenericMessage<String>("@loadLoginedAndDefaultSPFromDB.start()"));
+    	controlChannel.send(new GenericMessage<String>("@loadLoginedAndDefaultSPFromDB.start()"));
     }
 }

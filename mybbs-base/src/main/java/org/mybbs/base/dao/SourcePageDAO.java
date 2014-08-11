@@ -1,5 +1,6 @@
 package org.mybbs.base.dao;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.mybbs.base.jpa.BaseRepository;
@@ -10,9 +11,13 @@ import org.springframework.data.repository.query.Param;
 public interface SourcePageDAO extends BaseRepository<SourcePage, String> {
 	
 	
-	static String GETDEFAULTSPSQL = "SELECT DISTINCT SP.* FROM TBL_SOURCE_PAGE SP where sp.id in" +
+	static String GET_DEFAULT_SP_SQL = "SELECT DISTINCT SP.* FROM TBL_SOURCE_PAGE SP where sp.id in" +
 			"(select ussp.SOURCE_PAGE_ID from TBL_SETTING_TO_SOURCE_PAGE ussp where ussp.user_setting_id in" +
 			" (select us.id from tbl_user_setting us where us.category='D'))";
+	
+	static String GET_CUR_SP_SQL = "SELECT DISTINCT SP.* FROM TBL_SOURCE_PAGE SP where sp.id in" +
+			"(select ussp.SOURCE_PAGE_ID from TBL_SETTING_TO_SOURCE_PAGE ussp where ussp.user_setting_id in" +
+			" (select us.id from tbl_user_setting us where us.category='U' and us.temp_cookie_id in (:ids) ))";
 	
 	@Query("SELECT sp FROM SourcePage sp WHERE sp.status =:status AND sp.category = :category")
 	public List<SourcePage> getSourcePagesByStatusAndCategory(@Param("status") String status, @Param("category") String category);
@@ -26,6 +31,9 @@ public interface SourcePageDAO extends BaseRepository<SourcePage, String> {
 	public List<SourcePage> getAllSubscibedSP();
 	
 	
-	@Query(value=GETDEFAULTSPSQL, nativeQuery = true)
+	@Query(value=GET_DEFAULT_SP_SQL, nativeQuery = true)
 	public List<SourcePage> getDefaultSP();
+	
+	@Query(value = GET_CUR_SP_SQL, nativeQuery = true)
+	public List<SourcePage> getCurSp(@Param("ids") String[] ids);
 }

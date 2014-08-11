@@ -460,4 +460,13 @@ public class DataInit {
 			sps.getSourcePageFilters().size();
 		}
 	}
+	
+	@Test
+	public void test2(){
+		/*List<String> list = new ArrayList<String>();
+		list.add("bcb2a76e1df711e4a5b4e4115b5340f1");
+		list.add("26875a1e1d3e11e49acfe4115b5340f1");*/
+		String[] strs = {"bcb2a76e1df711e4a5b4e4115b5340f1","26875a1e1d3e11e49acfe4115b5340f1"};
+		sourcePageDAO.getCurSp(strs);
+	}
 }
